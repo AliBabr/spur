@@ -2,8 +2,6 @@
 require_relative 'application'
 
 # Initialize the Rails application.
-Rails.application.initialize!
-
 
 Rails.application.configure do
   config.action_mailer.raise_delivery_errors = true
@@ -22,3 +20,5 @@ Rails.application.configure do
     # ^ ^ remove this option ^ ^
   }
 end
+
+Rails.application.initialize!
