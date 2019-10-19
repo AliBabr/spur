@@ -6,17 +6,17 @@ class Api::V1::UsersController < ApplicationController
 
   def sign_in
     if params[:email].blank?
-      render json: "Email can't be blank!"
+      render json: {message: "Email can't be blank!"}
     else
       user = User.where(email: params[:email]).first
       if user.present?
         if user.valid_password?(params[:password])
           render json: user.as_json(only: [:id, :first_name, :last_name, :email, :authentication_token]), stauts: :loged_in
         else
-          render json: "Invalid password"
+          render json: {message: "Invalid password!"}
         end
       else
-        render json: "Invalid Email"
+        render json: {message: "Invalid Email!"}
       end
     end
   end
@@ -37,9 +37,9 @@ class Api::V1::UsersController < ApplicationController
 
   def log_out
     if validate_token() && User.find(params[:user_id]).update(authentication_token: nil)
-      render json: "log out successfuly"
+      render json: {message: "log out successfuly!"}
     else
-      render json: "unauthorized"
+      render json: {message: "unauthorized!"}
     end
   end
 
@@ -50,10 +50,10 @@ class Api::V1::UsersController < ApplicationController
       if user.errors.any?
         render json: user.errors.messages
       else
-      render json: user.as_json(only: [:id, :first_name, :last_name, :email, :authentication_token])
+      render json: user.as_json(only: [:id, :first_name, :last_name, :email])
       end
     else
-      render json: "unauthorized"
+      render json: {message: "unauthorized!"}
     end
   end
 
@@ -66,21 +66,52 @@ class Api::V1::UsersController < ApplicationController
           if user.errors.any?
             render json: user.errors.messages
           else
-            render json: user.as_json(only: [:id, :first_name, :last_name, :email, :authentication_token])
+            render json: user.as_json(only: [:id, :first_name, :last_name, :email])
           end
         else
-          render json: 'current_password is not matching'
+          render json: {message: "current_password is not matching!"}
         end
       else
         user.update(user_params)
         if user.errors.any?
           render json: user.errors.messages
         else
-          render json: user.as_json(only: [:id, :first_name, :last_name, :email, :authentication_token])
+          render json: user.as_json(only: [:id, :first_name, :last_name, :email])
         end
       end
     else
-      render json: "unauthorized"
+      render json: {message: "unauthorized!"}
+    end
+  end
+
+
+  def forgot_password
+    if params[:email].blank?
+      render json: {message: "Email can't be blank!"}
+    else
+      user = User.where(email: params[:email]).first
+      if user.present?
+        o = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten
+        token = (0...15).map { o[rand(o.length)] }.join
+        UserMailer.forgot_password(user, token).deliver
+        user.update(reset_token: token)
+        render json: {reset_password_token: token, id: user.id}
+      else
+        render json: {message: "Invalid Email!"}
+      end
+    end
+  end
+
+  def authenticate_reset_password_token
+    user = User.find(params[:id])
+    if params[:reset_password_token].present?
+      if params[:reset_password_token] == user.reset_token
+        render json: user.as_json(only: [:id, :authentication_token])
+      else
+        render json: {message: "Reset password token is not matching!"}
+      end
+    else
+      render json: {message: "Please provide reset password token!"}
     end
   end
 
@@ -93,6 +124,5 @@ class Api::V1::UsersController < ApplicationController
   def user_params
     params.permit(:email, :password, :first_name, :last_name)
   end
-
 
 end
