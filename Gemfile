@@ -8,7 +8,13 @@ gem 'rails', '~> 5.2.3'
 gem 'devise'
 gem 'simple_token_authentication', '~> 1.0'
 # Use sqlite3 as the database for Active Record
-gem 'sqlite3'
+#gem 'sqlite3'
+# Use postgresql as the database for Active Record
+gem 'pg'
+# User google places api 
+gem 'google_places'
+# Use pry for debugging purposes
+ gem 'pry'
 # Use Puma as the app server
 gem 'puma', '~> 3.11'
 # Use SCSS for stylesheets

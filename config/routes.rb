@@ -11,6 +11,8 @@ Rails.application.routes.draw do
           post :log_out
         end
       end
+
+      resources :places, only: :index
     end
   end
 
