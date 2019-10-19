@@ -9,6 +9,9 @@ Rails.application.routes.draw do
           post :sign_in
           post :sign_up
           post :log_out
+          post :update_password
+          post :forgot_password
+          post :authenticate_reset_password_token
         end
       end
 
