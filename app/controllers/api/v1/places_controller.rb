@@ -1,9 +1,9 @@
 class Api::V1::PlacesController < ApplicationController
     def index
         begin
-            @client = GooglePlaces::Client.new('AIzaSyD-2KnDs0lN_0Z293JcYo9pDFF280_819k')
+            @client = GooglePlaces::Client.new(ENV["GOOGLE_PLACES_KEY"])
             temp=@client.spots(-33.8670522, 151.1957362, :types => ['restaurant','bar'])
-            temp1=@client.predictions_by_input('San F',lat: 0.0,lng: 0.0,radius: 20000000,types: 'geocode')
+            temp1=@client.predictions_by_input('San F',lat: 0.0,lng: 0.0)
             binding.pry
         rescue => exception
             binding.pry
