@@ -11,6 +11,7 @@ Rails.application.routes.draw do
           post :log_out
           post :update_password
           post :forgot_password
+          post :reset_password
           post :authenticate_reset_password_token
         end
       end

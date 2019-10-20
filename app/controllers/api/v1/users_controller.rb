@@ -1,8 +1,5 @@
 
 class Api::V1::UsersController < ApplicationController
-  # before_action :authenticate_user!
-  # respond_to :json
-  # skip_before_filter :verify_authenticity_token
 
   def sign_in
     if params[:email].blank?
@@ -30,57 +27,61 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
-  def index
-    user = User.all
-    render json: user
-  end
-
   def log_out
-    if validate_token() && User.find(params[:user_id]).update(authentication_token: nil)
-      render json: {message: "log out successfuly!"}
+    user = User.find(params[:id])
+    if user.present?
+      if validate_token() && User.find(params[:id]).update(authentication_token: nil)
+        render json: {message: "log out successfuly!"}
+      else
+        render json: {message: "unauthorized!"}
+      end
     else
-      render json: {message: "unauthorized!"}
+      render json: {message: "User Not found please give valid id"}
     end
   end
 
   def update
-    if validate_token()
-      user = User.find(params[:id])
-      user.update(user_params)
-      if user.errors.any?
-        render json: user.errors.messages
+    user = User.find(params[:id])
+    if user.present?
+      if validate_token()
+        user.update(user_params)
+        if user.errors.any?
+          render json: user.errors.messages
+        else
+        render json: user.as_json(only: [:id, :first_name, :last_name, :email])
+        end
       else
-      render json: user.as_json(only: [:id, :first_name, :last_name, :email])
+        render json: {message: "unauthorized!"}
       end
     else
-      render json: {message: "unauthorized!"}
+      render json: {message: "User Not found please give valid id"}
     end
   end
 
   def update_password
     user = User.find(params[:id])
-    if validate_token()
-      if params[:current_password].present?
-        if user.valid_password?(params[:current_password])
-          user.update(user_params)
-          if user.errors.any?
-            render json: user.errors.messages
+    if user.present?
+      user = User.find(params[:id])
+      if validate_token()
+        if params[:current_password].present?
+          if user.valid_password?(params[:current_password])
+            user.update(user_params)
+            if user.errors.any?
+              render json: user.errors.messages
+            else
+              render json: user.as_json(only: [:id, :first_name, :last_name, :email])
+            end
           else
-            render json: user.as_json(only: [:id, :first_name, :last_name, :email])
+            render json: {message: "current_password is not matching!"}
           end
         else
-          render json: {message: "current_password is not matching!"}
+          render json: {message: "please provide current password!"}
         end
       else
-        user.update(user_params)
-        if user.errors.any?
-          render json: user.errors.messages
-        else
-          render json: user.as_json(only: [:id, :first_name, :last_name, :email])
-        end
+        render json: {message: "unauthorized!"}
       end
     else
-      render json: {message: "unauthorized!"}
+      render json: {message: "User Not found please give valid id"}
     end
   end
 
@@ -104,14 +105,42 @@ class Api::V1::UsersController < ApplicationController
 
   def authenticate_reset_password_token
     user = User.find(params[:id])
-    if params[:reset_password_token].present?
-      if params[:reset_password_token] == user.reset_token
-        render json: user.as_json(only: [:id, :authentication_token])
+    if user.present?
+      user = User.find(params[:id])
+      if params[:reset_password_token].present?
+        if params[:reset_password_token] == user.reset_token
+          render json: user.as_json(only: [:id, :authentication_token])
+        else
+          render json: {message: "Reset password token is not matching!"}
+        end
       else
-        render json: {message: "Reset password token is not matching!"}
+        render json: {message: "Please provide reset password token!"}
       end
     else
-      render json: {message: "Please provide reset password token!"}
+      render json: {message: "User Not found please give valid id"}
+    end
+  end
+
+  def reset_password
+    user = User.find(params[:id])
+    if user.present?
+      user = User.find(params[:id])
+      if validate_token()
+        if params[:confirm_password].present?
+          user.update(user_params.merge({password_confirmation: params[:confirm_password]}))
+          if user.errors.any?
+            render json: user.errors.messages
+          else
+            render json: user.as_json(only: [:id, :first_name, :last_name, :email])
+          end
+        else
+          render json: {message: "confirm password is not present"}
+        end
+      else
+        render json: {message: "unauthorized!"}
+      end
+    else
+      render json: {message: "User Not found please give valid id"}
     end
   end
 
@@ -122,7 +151,7 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def user_params
-    params.permit(:email, :password, :password_confirmation, :first_name, :last_name)
+    params.permit(:email, :password, :first_name, :last_name)
   end
 
 end
