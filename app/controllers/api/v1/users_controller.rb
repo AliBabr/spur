@@ -1,46 +1,46 @@
 
 class Api::V1::UsersController < ApplicationController
 
+  # Validates user and send token in response
   def sign_in
     if params[:email].blank?
       render json: {message: "Email can't be blank!"}
     else
-      user = User.where(email: params[:email]).first
-      if user.present?
-        if user.valid_password?(params[:password])
-          render json: user.as_json(only: [:first_name, :last_name, :email, :authentication_token]), stauts: :loged_in
-          response.headers['authentication_token'] = user.authentication_token
-          response.headers['UUID'] = user.id
-        else
-          render json: {message: "Invalid password!"}
-        end
+      user = User.find_by_email(params[:email])
+      if user.present? && user.valid_password?(params[:password])
+        render json: user.as_json(only: [:first_name, :last_name, :email]), status: :logged_in
+        response.headers["uuid"]=user.uuid
+        response.headers["authentication_token"]=user.authentication_token
       else
-        render json: {message: "Invalid Email!"}
+        render json: {message: "No Email and Password matching that account were found"}
       end
     end
   end
 
+
+  # Method which accepts credential from user and save data in db
   def sign_up
     user = User.new(user_params)
+    user.uuid=SecureRandom.uuid 
     if user.save
-      render json: user.as_json(only: [:first_name, :last_name, :email]), stauts: :loged_up
-      response.headers['authentication_token'] = user.authentication_token
-      response.headers['UUID'] = user.id
+      render json: user.as_json(only: [:first_name, :last_name, :email]), status: :created
+      response.headers["uuid"]=user.uuid
+      response.headers["authentication-token"]=user.authentication_token
     else
       render json: user.errors.messages
     end
   end
 
   def log_out
-    user = User.find(params[:id])
+    user = User.find_by_uuid(params[:uuid])
     if user.present?
-      if validate_token() && User.find(params[:id]).update(authentication_token: nil)
-        render json: {message: "log out successfuly!"}
+      if User.validate_token(params[:uuid],params[:authentication_token]) && user.update(authentication_token: nil)
+        render json: {message: "Logged out successfuly!"}
       else
-        render json: {message: "unauthorized!"}
+        render json: {message: "Unauthorized!"}
       end
     else
-      render json: {message: "User Not found please give valid id"}
+      render json: {message: "User Not found!"}
     end
   end
 
@@ -52,13 +52,13 @@ class Api::V1::UsersController < ApplicationController
         if user.errors.any?
           render json: user.errors.messages
         else
-        render json: user.as_json(only: [:id, :first_name, :last_name, :email])
+        render json: user.as_json(only: [:first_name, :last_name, :email])
         end
       else
-        render json: {message: "unauthorized!"}
+        render json: {message: "Unauthorized!"}
       end
     else
-      render json: {message: "User Not found please give valid id"}
+      render json: {message: "User Not found!"}
     end
   end
 
@@ -73,19 +73,19 @@ class Api::V1::UsersController < ApplicationController
             if user.errors.any?
               render json: user.errors.messages
             else
-              render json: user.as_json(only: [:id, :first_name, :last_name, :email])
+              render json: user.as_json(only: [:first_name, :last_name, :email])
             end
           else
-            render json: {message: "current_password is not matching!"}
+            render json: {message: "Invalid Password!"}
           end
         else
-          render json: {message: "please provide current password!"}
+          render json: {message: "Password Empty!"}
         end
       else
-        render json: {message: "unauthorized!"}
+        render json: {message: "Unauthorized!"}
       end
     else
-      render json: {message: "User Not found please give valid id"}
+      render json: {message: "User Not found!"}
     end
   end
 
@@ -129,9 +129,9 @@ class Api::V1::UsersController < ApplicationController
 
   private
 
-  def validate_token
-    User.find(params[:id]).authentication_token == params[:authentication_token]
-  end
+  # def validate_token
+  #   User.find(params[:id]).authentication_token == params[:authentication_token]
+  # end
 
   def user_params
     params.permit(:email, :password, :first_name, :last_name)
