@@ -10,4 +10,9 @@ class User < ApplicationRecord
   # Make the authentication token to be disposable - for example
   renew_authentication_token!
   end
+
+  # Validate authentication token if exists
+  def self.validate_token(uuid,auth_token)
+    self.find_by_uuid(uuid).authentication_token == auth_token
+  end
 end
