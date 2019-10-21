@@ -1,0 +1,33 @@
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+
+<div class="wrapper fadeInDown">
+  <div id="formContent">
+    <div class="fadeIn first">
+      <h2 class= "modal-heading"> Reset Passoword </h2>
+    </div>
+    <form action="/api/v1/users/reset_password" method="POST" id="loginForm" name="loginForm" >
+      <input type="hidden" id="uuid" name="uuid" value=<%=@uuid%>>
+      <input type="password" id="password" class="fadeIn second" name="password" placeholder="Password" required>
+      <input type="password" id="confirmpassword" class="fadeIn third" name="confirm_password" placeholder="Confirm Password" required>
+      <input type="text" id="reset" class="fadeIn second" name="token" placeholder="Paste token here" required>
+      <input type="submit" class="fadeIn fourth reset-submit-button" value="Save" onClick="validatePassword();"  >
+    </form>
+
+    <% if @user.present? %>
+      <% if @user.errors.any? %>
+        <% @user.errors.full_messages.each do |message| %>
+          <li class="errors"><%= message %></li>
+        <% end %>
+      <% end %>
+    <% end %>
+    <% if @error.present? %>
+      <li class="errors"><%= @error %></li>
+    <% end %>
+    <div id="formFooter">
+    </div>
+
+  </div>
+</div>

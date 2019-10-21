@@ -14,6 +14,9 @@ Rails.application.routes.draw do
           post :reset_password
           post :authenticate_reset_password_token
         end
+        member do
+          get :reset
+        end
       end
 
       resources :places, only: :index
