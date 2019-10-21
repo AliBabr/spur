@@ -129,12 +129,7 @@ class Api::V1::UsersController < ApplicationController
 
   private
 
-  # def validate_token
-  #   User.find(params[:id]).authentication_token == params[:authentication_token]
-  # end
-
   def user_params
     params.permit(:email, :password, :first_name, :last_name)
   end
-
 end
