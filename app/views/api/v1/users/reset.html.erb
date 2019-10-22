@@ -10,9 +10,9 @@
     </div>
     <form action="/api/v1/users/reset_password" method="POST" id="loginForm" name="loginForm" >
       <input type="hidden" id="uuid" name="uuid" value=<%=@uuid%>>
+      <input type="hidden" id="token" name="token" value=<%=@token%>>
       <input type="password" id="password" class="fadeIn second" name="password" placeholder="Password" required>
       <input type="password" id="confirmpassword" class="fadeIn third" name="confirm_password" placeholder="Confirm Password" required>
-      <input type="text" id="reset" class="fadeIn second" name="token" placeholder="Paste token here" required>
       <input type="submit" class="fadeIn fourth reset-submit-button" value="Save" onClick="validatePassword();"  >
     </form>
 
