@@ -63,7 +63,6 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def update_password
-    binding.pry
     user = User.find_by_uuid(request.headers['UUID'])
     if user.present?
       if User.validate_token(request.headers['UUID'],request.headers['Authentication-Token'])
@@ -73,7 +72,7 @@ class Api::V1::UsersController < ApplicationController
             if user.errors.any?
               render json: user.errors.messages
             else
-              render json: user.as_json(only: [:first_name, :last_name, :email])
+              render json: {message: "Password updated successfully!"}
             end
           else
             render json: {message: "Invalid Current Password!"}
@@ -90,6 +89,7 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def reset
+    @token = params[:tokens]
     @uuid = params[:id]
   end
 
@@ -113,15 +113,16 @@ class Api::V1::UsersController < ApplicationController
 
   def reset_password
     @uuid = params[:uuid]
+    @token = params[:token]
     @user = User.find_by_uuid(params[:uuid])
     if params[:password] == params[:confirm_password]
-      if params[:token] === @user.reset_token && @user.last.updated_at > DateTime.now-1
+      if (params[:token] === @user.reset_token) && (@user.updated_at > DateTime.now-1)
         @user.update(password: params[:password], password_confirmation: params[:confirm_password], reset_token: '')
         if @user.errors.any?
           render 'reset'
         end
       else
-        @error = "Token is not macthing or expired"
+        @error = "Token is expired"
         render 'reset'
       end
     else
