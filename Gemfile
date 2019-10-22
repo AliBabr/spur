@@ -14,6 +14,8 @@ gem 'active_model_serializers', '~> 0.10.0'
 gem 'pg'
 # User google places api 
 gem 'google_places'
+# use figaro for environment variables
+gem 'figaro'
 # Use pry for debugging purposes
  gem 'pry'
  gem "slim-rails"
