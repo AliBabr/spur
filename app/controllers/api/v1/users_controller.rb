@@ -9,8 +9,8 @@ class Api::V1::UsersController < ApplicationController
       user = User.find_by_email(params[:email])
       if user.present? && user.valid_password?(params[:password])
         render json: user.as_json(only: [:first_name, :last_name, :email]), status: :logged_in
-        response.headers["uuid"]=user.uuid
-        response.headers["authentication_token"]=user.authentication_token
+        response.headers["UUID"]=user.uuid
+        response.headers["Authentication-Token"]=user.authentication_token
       else
         render json: {message: "No Email and Password matching that account were found"}
       end
@@ -24,30 +24,30 @@ class Api::V1::UsersController < ApplicationController
     user.uuid=SecureRandom.uuid 
     if user.save
       render json: user.as_json(only: [:first_name, :last_name, :email]), status: :created
-      response.headers["uuid"]=user.uuid
-      response.headers["authentication-token"]=user.authentication_token
+      response.headers["UUID"]=user.uuid
+      response.headers["Authentication-Token"]=user.authentication_token
     else
       render json: user.errors.messages
     end
   end
 
   def log_out
-    user = User.find_by_uuid(params[:uuid])
+    user = User.find_by_uuid(request.headers['UUID'])
     if user.present?
-      if User.validate_token(params[:uuid],params[:authentication_token]) && user.update(authentication_token: nil)
+      if User.validate_token(request.headers['UUID'],request.headers['Authentication-Token']) && user.update(authentication_token: nil)
         render json: {message: "Logged out successfuly!"}
       else
         render json: {message: "Unauthorized!"}
       end
     else
-      render json: {message: "User Not found!"}
+      render json: {message: "User Not Found!"}
     end
   end
 
-  def update
-    user = User.find(params[:id])
+  def update_account
+    user = User.find_by_uuid(request.headers['UUID'])
     if user.present?
-      if validate_token()
+      if User.validate_token(request.headers['UUID'],request.headers['Authentication-Token'])
         user.update(user_params)
         if user.errors.any?
           render json: user.errors.messages
@@ -63,10 +63,10 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def update_password
-    user = User.find(params[:id])
+    binding.pry
+    user = User.find_by_uuid(request.headers['UUID'])
     if user.present?
-      user = User.find(params[:id])
-      if validate_token()
+      if User.validate_token(request.headers['UUID'],request.headers['Authentication-Token'])
         if params[:current_password].present?
           if user.valid_password?(params[:current_password])
             user.update(user_params)
@@ -76,7 +76,7 @@ class Api::V1::UsersController < ApplicationController
               render json: user.as_json(only: [:first_name, :last_name, :email])
             end
           else
-            render json: {message: "Invalid Password!"}
+            render json: {message: "Invalid Current Password!"}
           end
         else
           render json: {message: "Password Empty!"}
