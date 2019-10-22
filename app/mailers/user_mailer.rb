@@ -9,7 +9,7 @@ class UserMailer < ApplicationMailer
   def forgot_password(user, token)
     @user = user
     @token = token
-    @url = reset_api_v1_user_url(@user)
+    @url = reset_api_v1_user_url(@user.uuid)
     # @token = (0...50).map { ('a'..'z').to_a[rand(26)] }.join
     mail to: user.email,  subject: "Forgot passowrd"
   end
