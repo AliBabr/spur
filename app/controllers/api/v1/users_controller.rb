@@ -104,7 +104,7 @@ class Api::V1::UsersController < ApplicationController
         token = (0...15).map { o[rand(o.length)] }.join
         UserMailer.forgot_password(user, token).deliver
         user.update(reset_token: token)
-        render json: {reset_password_token: token, id: user.id}
+        render json: {message: "Please check your Email for reset password!"}
       else
         render json: {message: "Invalid Email!"}
       end
@@ -113,10 +113,13 @@ class Api::V1::UsersController < ApplicationController
 
   def reset_password
     @uuid = params[:uuid]
-    @user = User.find(params[:uuid])
+    @user = User.find_by_uuid(params[:uuid])
     if params[:password] == params[:confirm_password]
-      if params[:toekn] == @user.reset_token
-        @user.update(password: params[password], password_confirmation: params[:confirm_password], reset_token: '')
+      if params[:token] === @user.reset_token && @user.last.updated_at > DateTime.now-1
+        @user.update(password: params[:password], password_confirmation: params[:confirm_password], reset_token: '')
+        if @user.errors.any?
+          render 'reset'
+        end
       else
         @error = "Token is not macthing or expired"
         render 'reset'

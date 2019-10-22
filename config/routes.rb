@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :sessions, only: [:create, :destroy]
-      resources :users do 
+      resources :users do
         collection do
           post :sign_in
           post :sign_up
@@ -12,7 +12,6 @@ Rails.application.routes.draw do
           post :update_password
           post :forgot_password
           post :reset_password
-          post :authenticate_reset_password_token
         end
         member do
           get :reset
