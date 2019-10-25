@@ -86,7 +86,7 @@ class Api::V1::UsersController < ApplicationController
 
   def reset
     @token = params[:tokens]
-    @uuid = params[:id]
+    @id = params[:id]
   end
 
 
@@ -108,9 +108,9 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def reset_password
-    @uuid = params[:uuid]
+    @id = params[:id]
     @token = params[:token]
-    @user = User.find_by_uuid(params[:uuid])
+    @user = User.find_by_id(params[:id])
     if params[:password] == params[:confirm_password]
       if (params[:token] === @user.reset_token) && (@user.updated_at > DateTime.now-1)
         @user.update(password: params[:password], password_confirmation: params[:confirm_password], reset_token: '')
