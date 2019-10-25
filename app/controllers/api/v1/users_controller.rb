@@ -8,7 +8,9 @@ class Api::V1::UsersController < ApplicationController
     else
       user = User.find_by_email(params[:email])
       if user.present? && user.valid_password?(params[:password])
-        render json: {email: user.email, firt_name: user.first_name, last_name: user.last_name, "X-SPUR-USER-ID" => user.uuid, "Authentication-Token" => user.authentication_token }, :status => 200
+        render json: {email: user.email, first_name: user.first_name, last_name: user.last_name, "X-SPUR-USER-ID" => user.uuid, "Authentication-Token" => user.authentication_token }, :status => 200
+        response.headers["'X-SPUR-USER-ID'"]=user.id
+        response.headers["authentication_token"]=user.authentication_token
       else
         render json: {message: "No Email and Password matching that account were found"}, :status => 400
       end
@@ -19,16 +21,18 @@ class Api::V1::UsersController < ApplicationController
   # Method which accepts credential from user and save data in db
   def sign_up
     user = User.new(user_params)
-    user.uuid=SecureRandom.uuid
+    user.id=SecureRandom.uuid 
     if user.save
-      render json: {email: user.email, firt_name: user.first_name, last_name: user.last_name, "X-SPUR-USER-ID" => user.uuid, "Authentication-Token" => user.authentication_token }, :status => 200
+      render json: {email: user.email, first_name: user.first_name, last_name: user.last_name, "X-SPUR-USER-ID" => user.uuid, "Authentication-Token" => user.authentication_token }, :status => 200
+      response.headers["'X-SPUR-USER-ID'"]=user.id
+      response.headers["authentication-token"]=user.authentication_token
     else
       render json: user.errors.messages , :status => 400
     end
   end
 
   def log_out
-    user = User.find_by_uuid(request.headers['X-SPUR-USER-ID'])
+    user = User.find_by_id(request.headers['X-SPUR-USER-ID'])
     if user.present?
       if User.validate_token(request.headers['X-SPUR-USER-ID'],request.headers['Authentication-Token']) && user.update(authentication_token: nil)
         render json: {message: "Logged out successfuly!"}, :status => 200
