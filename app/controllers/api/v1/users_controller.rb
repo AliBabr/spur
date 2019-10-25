@@ -9,8 +9,6 @@ class Api::V1::UsersController < ApplicationController
       user = User.find_by_email(params[:email])
       if user.present? && user.valid_password?(params[:password])
         render json: {email: user.email, first_name: user.first_name, last_name: user.last_name, "X-SPUR-USER-ID" => user.uuid, "Authentication-Token" => user.authentication_token }, :status => 200
-        response.headers["'X-SPUR-USER-ID'"]=user.id
-        response.headers["authentication_token"]=user.authentication_token
       else
         render json: {message: "No Email and Password matching that account were found"}, :status => 400
       end
@@ -24,8 +22,6 @@ class Api::V1::UsersController < ApplicationController
     user.id=SecureRandom.uuid 
     if user.save
       render json: {email: user.email, first_name: user.first_name, last_name: user.last_name, "X-SPUR-USER-ID" => user.uuid, "Authentication-Token" => user.authentication_token }, :status => 200
-      response.headers["'X-SPUR-USER-ID'"]=user.id
-      response.headers["authentication-token"]=user.authentication_token
     else
       render json: user.errors.messages , :status => 400
     end
