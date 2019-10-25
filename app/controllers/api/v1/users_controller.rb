@@ -9,7 +9,7 @@ class Api::V1::UsersController < ApplicationController
       user = User.find_by_email(params[:email])
       if user.present? && user.valid_password?(params[:password])
         render json: user.as_json(only: [:first_name, :last_name, :email]), status: :logged_in
-        response.headers["uuid"]=user.uuid
+        response.headers["uuid"]=user.id
         response.headers["authentication_token"]=user.authentication_token
       else
         render json: {message: "No Email and Password matching that account were found"}
@@ -21,10 +21,11 @@ class Api::V1::UsersController < ApplicationController
   # Method which accepts credential from user and save data in db
   def sign_up
     user = User.new(user_params)
-    user.uuid=SecureRandom.uuid 
+    # Needs to be fixed
+    user.id=SecureRandom.uuid 
     if user.save
       render json: user.as_json(only: [:first_name, :last_name, :email]), status: :created
-      response.headers["uuid"]=user.uuid
+      response.headers["uuid"]=user.id
       response.headers["authentication-token"]=user.authentication_token
     else
       render json: user.errors.messages
@@ -32,7 +33,7 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def log_out
-    user = User.find_by_uuid(params[:uuid])
+    user = User.find_by_id(params[:uuid])
     if user.present?
       if User.validate_token(params[:uuid],params[:authentication_token]) && user.update(authentication_token: nil)
         render json: {message: "Logged out successfuly!"}
@@ -113,7 +114,7 @@ class Api::V1::UsersController < ApplicationController
 
   def reset_password
     @uuid = params[:uuid]
-    @user = User.find_by_uuid(params[:uuid])
+    @user = User.find_by_id(params[:uuid])
     if params[:password] == params[:confirm_password]
       if params[:token] === @user.reset_token && @user.last.updated_at > DateTime.now-1
         @user.update(password: params[:password], password_confirmation: params[:confirm_password], reset_token: '')

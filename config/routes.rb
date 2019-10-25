@@ -19,6 +19,7 @@ Rails.application.routes.draw do
       end
 
       resources :places, only: :index
+      resources :history, only: :index
     end
   end
 
