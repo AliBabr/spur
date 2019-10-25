@@ -1,7 +1,7 @@
 class Api::V1::HistoryController < ApplicationController
     def index
-        if User.validate_token(request.headers["UUID"],request.headers["Authentication-Token"])!=false
-          user=User.find_by_id(request.headers["UUID"])
+        if User.validate_token(request.headers['X-SPUR-USER-ID'],request.headers["Authentication-Token"])!=false
+          user=User.find_by_id(request.headers['X-SPUR-USER-ID'])
           if user.present?
             history=user.histories
             render :json => {:message => "Success", :data => history.as_json(only: [:place_type, :google_place_id, :lat, :lng])}, :status => :ok
