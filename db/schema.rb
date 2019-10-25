@@ -46,6 +46,7 @@ ActiveRecord::Schema.define(version: 2019_10_25_134117) do
     t.string "authentication_token", limit: 30
     t.string "reset_token"
     t.string "uuid"
+    t.boolean "notification_status", default: false
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
