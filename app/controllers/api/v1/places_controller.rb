@@ -20,8 +20,8 @@ class Api::V1::PlacesController < ApplicationController
                 preference.user=user
                 preference.save 
                 #------------------ Ending Save preferences ------------------------ 
-                
-                filters=params[:filters].values
+                filters=Array.new
+                filters=params[:filters].values if params[:filters].present?
                 filters.push(params[:type])
                 places=@client.spots(params[:lat], params[:lng], :radius => params[:radius], :types => filters)
                 # Select places on the basis of price_level
