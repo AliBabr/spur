@@ -21,12 +21,13 @@ class Api::V1::PlacesController < ApplicationController
                 preference.save 
                 #------------------ Ending Save preferences ------------------------ 
                 
-                places=@client.spots(params[:lat], params[:lng], :radius => params[:radius], :types => params[:type])
+                filters=params[:filters].values
+                filters.push(params[:type])
+                places=@client.spots(params[:lat], params[:lng], :radius => params[:radius], :types => filters)
                 # Select places on the basis of price_level
                 places.each do | item |
                     selectPlace << item if item.price_level.present? && item.price_level == params[:price_level].to_i               
                 end
-
                 # Filter data from places
                 # placeslist = places.map do |u|
                 #     { :name => u.name, :lat => u.lat, :lng => u.lng, :price_level => u.price_level, :ratings => u.rating}
