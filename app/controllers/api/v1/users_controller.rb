@@ -64,7 +64,7 @@ class Api::V1::UsersController < ApplicationController
       if User.validate_token(request.headers['X-SPUR-USER-ID'],request.headers['Authentication-Token'])
         if params[:current_password].present?
           if user.valid_password?(params[:current_password])
-            user.update(user_params)
+            user.update(password: params[:new_password])
             if user.errors.any?
               render json: user.errors.messages, :status => 400
             else

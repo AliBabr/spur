@@ -12,7 +12,6 @@ Rails.application.routes.draw do
           post :update_account
           post :forgot_password
           post :reset_password
-          post :toggle_notification
         end
         member do
           get :reset
