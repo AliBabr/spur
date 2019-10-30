@@ -4,7 +4,11 @@ class Api::V1::HistoryController < ApplicationController
           user=User.find_by_id(request.headers['X-SPUR-USER-ID'])
           if user.present?
             history=user.histories
-            render :json => {:message => "Success", :data => history.as_json(only: [:place_type, :google_place_id, :lat, :lng])}, :status => :ok
+            histories=[]
+            user.histories.each do |history|
+              histories << {place_type: history.place_type, name: history.name, date: history.created_at.to_date}
+            end
+            render json: histories, :status => 200
           else
             render :json =>{ :message => "User not found!"}, :status => :not_found
           end
