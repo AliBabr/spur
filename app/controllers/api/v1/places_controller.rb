@@ -3,6 +3,9 @@ class Api::V1::PlacesController < ApplicationController
     if User.validate_token(request.headers['X-SPUR-USER-ID'],request.headers["Authentication-Token"])!=false
       user=User.find_by_id(request.headers['X-SPUR-USER-ID'])
         if user.present?
+            radius = "100"
+            type= 'restaurant'
+            price_level="2"
             begin
                 @client = GooglePlaces::Client.new(ENV["GOOGLE_PLACES_KEY"])
                 
@@ -20,18 +23,19 @@ class Api::V1::PlacesController < ApplicationController
                 preference.user=user
                 preference.save 
                 #------------------ Ending Save preferences ------------------------ 
-                filters=Array.new
-                filters=params[:filters].values if params[:filters].present?
-                filters.push(params[:type])
-                places=@client.spots(params[:lat], params[:lng], :radius => params[:radius], :types => filters)
-                # Select places on the basis of price_level
-                places.each do | item |
-                    selectPlace << item if item.price_level.present? && item.price_level == params[:price_level].to_i               
+                
+                radius = params[:radius] if params[:radius].present?
+                type = params[:type] if params[:type].present?
+                price_level = params[:price_level] if params[:price_level].present?
+                if params[:lat].present? && params[:lng].present?
+                    places=@client.spots(params[:lat], params[:lng], :radius => radius, :type => type)
+                    # Select places on the basis of price_level
+                    places.each do | item |
+                        selectPlace << item if item.price_level.present? && item.price_level == price_level.to_i               
+                    end
+                else
+                    return render :json => { :message => "Longitude or Latitude missing" }, :status => :bad_request
                 end
-                # Filter data from places
-                # placeslist = places.map do |u|
-                #     { :name => u.name, :lat => u.lat, :lng => u.lng, :price_level => u.price_level, :ratings => u.rating}
-                # end
     
                 #---------------- Begining Code to save history --------------------
                 history=History.new(place_type: params[:type], lat:selectPlace.first.lat, lng:selectPlace.first.lng, google_place_id:selectPlace.first.place_id)
