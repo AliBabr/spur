@@ -36,9 +36,10 @@ class Api::V1::PlacesController < ApplicationController
                   else
                       return render :json => { :message => "Longitude or Latitude missing" }, :status => :bad_request
                   end
+
                   #---------------- Begining Code to save history --------------------
                   if selectPlace.present?
-                      history=History.new(place_type: type, lat:selectPlace.first.lat, lng:selectPlace.first.lng, google_place_id:selectPlace.first.place_id)
+                      history=History.new(place_type: type, lat:selectPlace.first.lat, lng:selectPlace.first.lng, google_place_id:selectPlace.first.place_id, name: selectPlace.first.name)
                       history.user=user
                       history.save
                   else
