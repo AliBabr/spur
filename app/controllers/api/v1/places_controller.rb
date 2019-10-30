@@ -28,11 +28,16 @@ class Api::V1::PlacesController < ApplicationController
                   price_level = params[:price_level] if params[:price_level].present?
                   
                   if params[:lat].present? && params[:lng].present?
-                      places=@client.spots(params[:lat], params[:lng], :radius => radius, :type => type)
-                      # Select places on the basis of price_level
-                      places.each do | item |
-                          selectPlace << item if item.price_level.present? && item.price_level == price_level.to_i               
-                      end
+                    if params[:filters].present?
+                        places=@client.spots(params[:lat], params[:lng], :radius => radius, :type=>type, :name=> params[:filters].values)
+                    else
+                        places=@client.spots(params[:lat], params[:lng], :radius => radius, :type=>type)
+                    end
+ 
+                    # Select places on the basis of price_level
+                    places.each do | item |
+                        selectPlace << item if item.price_level.present? && item.price_level == price_level.to_i               
+                    end
                   else
                       return render :json => { :message => "Longitude or Latitude missing" }, :status => :bad_request
                   end
