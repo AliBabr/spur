@@ -1,7 +1,7 @@
 class Api::V1::NotificationsController < ApplicationController
 
   def toggle_notification
-    user = User.find_by_uuid(request.headers['X-SPUR-USER-ID'])
+    user = User.find_by_id(request.headers['X-SPUR-USER-ID'])
     if user.present?
       if User.validate_token(request.headers['X-SPUR-USER-ID'],request.headers['Authentication-Token'])
         if params[:status].present?
