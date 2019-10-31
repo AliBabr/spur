@@ -19,9 +19,9 @@ Rails.application.routes.draw do
       end
       post '/notifications/toggle_notification', to: 'notifications#toggle_notification'
       resources :places, only: :index
-      resources :history, only: :index
+      resources :history, only: [:new, :index]
+      end
     end
-  end
 
   root to: "home#index"
 
