@@ -1,19 +1,24 @@
 class Api::V1::HistoryController < ApplicationController
-    def index
-        if User.validate_token(request.headers['X-SPUR-USER-ID'],request.headers["Authentication-Token"])!=false
-          user=User.find_by_id(request.headers['X-SPUR-USER-ID'])
-          if user.present?
-            history=user.histories
-            histories=[]
-            user.histories.each do |history|
-              histories << {place_type: history.place_type, name: history.name, date: history.created_at.to_date}
-            end
-            render json: histories, :status => 200
-          else
-            render :json =>{ :message => "User not found!"}, :status => :not_found
-          end
-        else
-          render :json =>{ :message => "Unauthorized!"}, :status => :Unauthorized
-        end 
+  before_action :authenticate, only: %i[index new]
+
+  def index
+    history=@user.histories
+    histories=[]
+    @user.histories.each do |history|
+      histories << {place_type: history.place_type, name: history.name, date: history.created_at.to_date}
     end
+    render json: histories, :status => 200
+  end
+
+  def new
+    if params[:type].present? && params[:lat].present? && params[:lng].present? && params[:place_name].present?
+      history=History.new(place_type: params[:type], lat:params[:lat], lng:params[:lng], name: params[:place_name])
+      history.user=@user
+      history.save
+      message = "History saved successfully"
+    else
+      message = "Fields can't be empty!"
+    end
+    render :json => { :message => message}, :status => :ok
+  end
 end
