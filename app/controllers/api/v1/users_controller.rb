@@ -17,23 +17,28 @@ class Api::V1::UsersController < ApplicationController
         render json: { message: 'No Email and Password matching that account were found' }, status: 400
       end
     end
+  rescue StandardError => e # rescu if any exception occure
+    render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
   end
 
   # Method which accepts parameters from user and save data in db
   def sign_up
-    user = User.new(user_params)
-    user.id = SecureRandom.uuid # genrating secure uuid token
+    user = User.new(user_params); user.id = SecureRandom.uuid # genrating secure uuid token
     if user.save
       render json: { email: user.email, first_name: user.first_name, last_name: user.last_name, 'X-SPUR-USER-ID' => user.id, 'Authentication-Token' => user.authentication_token }, status: 200
     else
       render json: user.errors.messages, status: 400
     end
+  rescue StandardError => e # rescu if any exception occure
+    render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
   end
 
   # Methode that expire user session
   def log_out
     @user.update(authentication_token: nil)
     render json: { message: 'Logged out successfuly!' }, status: 200
+  rescue StandardError => e
+    render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
   end
 
   # Methode take parameters and udate user account
@@ -44,6 +49,8 @@ class Api::V1::UsersController < ApplicationController
     else
       render json: @user.as_json(only: %i[first_name last_name email]), status: 200
     end
+  rescue StandardError => e
+    render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
   end
 
   # Mwthode take current password and new password and update password
@@ -58,6 +65,8 @@ class Api::V1::UsersController < ApplicationController
     else
       render json: { message: 'Current Password is not present or invalid!' }, status: 400
     end
+  rescue StandardError => e # rescu if any exception occure
+    render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
   end
 
   # Methode that render reset password form
@@ -71,6 +80,8 @@ class Api::V1::UsersController < ApplicationController
     UserMailer.forgot_password(@user, @token).deliver
     @user.update(reset_token: @token)
     render json: { message: 'Please check your Email for reset password!' }, status: 200
+  rescue StandardError => e
+    render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
   end
 
   # Methode that take new password and cunform password and reset user password
@@ -79,9 +90,10 @@ class Api::V1::UsersController < ApplicationController
       @user.update(password: params[:password], password_confirmation: params[:confirm_password], reset_token: '')
       render 'reset' if @user.errors.any?
     else
-      @error = 'Token is expired'
-      render 'reset'
+      @error = 'Token is expired'; render 'reset'
     end
+  rescue StandardError => e
+    render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
   end
 
   private
@@ -97,8 +109,7 @@ class Api::V1::UsersController < ApplicationController
     else
       @user = User.where(email: params[:email]).first
       if @user.present?
-        o = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten
-        @token = (0...15).map { o[rand(o.length)] }.join
+        o = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten; @token = (0...15).map { o[rand(o.length)] }.join
       else
         render json: { message: 'Invalid Email!' }, status: 400
       end
@@ -107,9 +118,7 @@ class Api::V1::UsersController < ApplicationController
 
   # Helper methode for reset password methode
   def before_reset
-    @id = params[:id]
-    @token = params[:token]
-    @user = User.find_by_id(params[:id])
+    @id = params[:id]; @token = params[:token]; @user = User.find_by_id(params[:id])
     if params[:password] == params[:confirm_password]
       return true
     else

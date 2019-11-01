@@ -16,4 +16,6 @@ class Api::V1::NotificationsController < ApplicationController
       render json: { message: 'Please set status' }, status: 400
     end
   end
+  rescue StandardError => e
+    render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
 end
