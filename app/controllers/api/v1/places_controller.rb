@@ -11,7 +11,6 @@ class Api::V1::PlacesController < ApplicationController
     render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
   end
 
-  # Save prefrence request for lator use
   def save_preference
     preference = Preference.new
     if params[:filters].present?
