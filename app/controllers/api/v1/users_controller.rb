@@ -21,8 +21,7 @@ class Api::V1::UsersController < ApplicationController
 
   # Method which accepts parameters from user and save data in db
   def sign_up
-    user = User.new(user_params)
-    user.id = SecureRandom.uuid # genrating secure uuid token
+    user = User.new(user_params); user.id = SecureRandom.uuid # genrating secure uuid token
     if user.save
       render json: { email: user.email, first_name: user.first_name, last_name: user.last_name, 'X-SPUR-USER-ID' => user.id, 'Authentication-Token' => user.authentication_token }, status: 200
     else
@@ -79,8 +78,7 @@ class Api::V1::UsersController < ApplicationController
       @user.update(password: params[:password], password_confirmation: params[:confirm_password], reset_token: '')
       render 'reset' if @user.errors.any?
     else
-      @error = 'Token is expired'
-      render 'reset'
+      @error = 'Token is expired'; render 'reset'
     end
   end
 
@@ -97,8 +95,7 @@ class Api::V1::UsersController < ApplicationController
     else
       @user = User.where(email: params[:email]).first
       if @user.present?
-        o = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten
-        @token = (0...15).map { o[rand(o.length)] }.join
+        o = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten; @token = (0...15).map { o[rand(o.length)] }.join
       else
         render json: { message: 'Invalid Email!' }, status: 400
       end
@@ -107,9 +104,7 @@ class Api::V1::UsersController < ApplicationController
 
   # Helper methode for reset password methode
   def before_reset
-    @id = params[:id]
-    @token = params[:token]
-    @user = User.find_by_id(params[:id])
+    @id = params[:id]; @token = params[:token]; @user = User.find_by_id(params[:id])
     if params[:password] == params[:confirm_password]
       return true
     else
