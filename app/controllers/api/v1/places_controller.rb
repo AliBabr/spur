@@ -5,10 +5,10 @@ class Api::V1::PlacesController < ApplicationController
   before_action :save_preference
 
   def index
-    selectPlace = Places.new(params).get_place
-    render json: { message: 'Success', data: selectPlace }, status: :ok
+    response = Places.new(params, @user).get_place
+    render json: { message: response[:message], data: response[:data] }, status: response[:status]
   rescue StandardError => e
-    render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
+    render json: { message: "Error: Something went wrong..." }, status: 400
   end
 
   def save_preference
