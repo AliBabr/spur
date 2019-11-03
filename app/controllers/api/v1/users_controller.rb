@@ -1,11 +1,9 @@
-# frozen_string_literal: true
-
 class Api::V1::UsersController < ApplicationController
-  before_action :authenticate, only: %i[update_account update_password log_out] # call back for validating user
+  before_action :authenticate, only: %i[update_account update_password log_out] # callback for validating user
   before_action :forgot_validation, only: [:forgot_password]
   before_action :before_reset, only: [:reset_password]
 
-  # Methode which accept credential from user and siginn in and return user data with authentication toekn
+  # Method which accept credential from user and sign in and return user data with authentication token
   def sign_in
     if params[:email].blank?
       render json: { message: "Email can't be blank!" }
@@ -18,7 +16,7 @@ class Api::V1::UsersController < ApplicationController
       end
     end
   rescue StandardError => e # rescu if any exception occure
-    render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
+    render json: { message: 'Error: Something went wrong... ' }, status: 400
   end
 
   # Method which accepts parameters from user and save data in db
@@ -29,11 +27,11 @@ class Api::V1::UsersController < ApplicationController
     else
       render json: user.errors.messages, status: 400
     end
-  rescue StandardError => e # rescu if any exception occure
-    render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
+  rescue StandardError => e # rescue if any exception occurr
+    render json: { message: 'Error: Something went wrong... ' }, status: 400
   end
 
-  # Methode that expire user session
+  # Method that expire user session
   def log_out
     @user.update(authentication_token: nil)
     render json: { message: 'Logged out successfuly!' }, status: 200
@@ -41,7 +39,7 @@ class Api::V1::UsersController < ApplicationController
     render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
   end
 
-  # Methode take parameters and udate user account
+  # Method take parameters and update user account
   def update_account
     @user.update(user_params)
     if @user.errors.any?
@@ -53,7 +51,7 @@ class Api::V1::UsersController < ApplicationController
     render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
   end
 
-  # Mwthode take current password and new password and update password
+  # Method take current password and new password and update password
   def update_password
     if params[:current_password].present? && @user.valid_password?(params[:current_password])
       @user.update(password: params[:new_password])
@@ -65,17 +63,17 @@ class Api::V1::UsersController < ApplicationController
     else
       render json: { message: 'Current Password is not present or invalid!' }, status: 400
     end
-  rescue StandardError => e # rescu if any exception occure
+  rescue StandardError => e # rescue if any exception occurr
     render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
   end
 
-  # Methode that render reset password form
+  # Method that render reset password form
   def reset
     @token = params[:tokens]
     @id = params[:id]
   end
 
-  # Methode that send email while user forgot password
+  # Method that send email while user forgot password
   def forgot_password
     UserMailer.forgot_password(@user, @token).deliver
     @user.update(reset_token: @token)
@@ -84,7 +82,7 @@ class Api::V1::UsersController < ApplicationController
     render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
   end
 
-  # Methode that take new password and cunform password and reset user password
+  # Method that take new password and confirm password and reset user password
   def reset_password
     if (params[:token] === @user.reset_token) && (@user.updated_at > DateTime.now - 1)
       @user.update(password: params[:password], password_confirmation: params[:confirm_password], reset_token: '')
@@ -102,7 +100,7 @@ class Api::V1::UsersController < ApplicationController
     params.permit(:email, :password, :first_name, :last_name)
   end
 
-  # Helper methode for forgot password methode
+  # Helper method for forgot password method
   def forgot_validation
     if params[:email].blank?
       render json: { message: "Email can't be blank!" }, status: 400
@@ -116,7 +114,7 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
-  # Helper methode for reset password methode
+  # Helper method for reset password method
   def before_reset
     @id = params[:id]; @token = params[:token]; @user = User.find_by_id(params[:id])
     if params[:password] == params[:confirm_password]

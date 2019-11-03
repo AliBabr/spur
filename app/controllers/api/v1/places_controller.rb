@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class Api::V1::PlacesController < ApplicationController
   before_action :authenticate, only: %i[index]
   before_action :save_preference
