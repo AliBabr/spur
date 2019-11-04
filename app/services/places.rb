@@ -11,13 +11,12 @@ class Places
 
   def get_place
     selectPlace = []
-    priceLevel = @params[:price_level] if @params[:price_level].present?
-    
+    @price_level = @params[:price_level] if @params[:price_level].present?
     if @params[:lat].present? && @params[:lng].present?
       places=search_place
       # Select places on the basis of price_level
       places.each do |place|
-        selectPlace << place if place.price_level.present? && place.price_level == priceLevel.to_i
+        selectPlace << place if place.price_level.present? && place.price_level == @price_level.to_i
       end
     else
       return {:data => 'Longitude or Latitude missing', :message => 'Error', :status => 400}
