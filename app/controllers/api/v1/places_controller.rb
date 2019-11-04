@@ -6,7 +6,7 @@ class Api::V1::PlacesController < ApplicationController
     response = Places.new(params, @user).get_place
     render json: { message: response[:message], data: response[:data] }, status: response[:status]
   rescue StandardError => e
-    render json: { message: "Error: Something went wrong..." }, status: 400
+    render json: { message: "Error: Something went wrong... #{e}" }, status: 400
   end
 
   def save_preference
