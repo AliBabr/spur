@@ -36,7 +36,9 @@ class Places
     @radius = @params[:radius] if @params[:radius].present?
     @type = @params[:type] if @params[:type].present?
     if @params[:filters].present?
-      places = @client.spots(@params[:lat], @params[:lng], radius: @radius, type: @type, name: @params[:filters].values)
+      places=HTTParty.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=#{@params[:lat]},#{@params[:lng]}&key=AIzaSyD-2KnDs0lN_0Z293JcYo9pDFF280_819k&name=#{@params[:filters]}&radius=#{@radius}&type=#{@type}')
+      binding.pry
+      # places = @client.spots(@params[:lat], @params[:lng], radius: @radius, type: @type, name: @params[:filters].values)
     else
       places = @client.spots(@params[:lat], @params[:lng], radius: @radius, type: @type)
     end 
