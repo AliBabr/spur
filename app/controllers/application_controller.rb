@@ -3,7 +3,7 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery prepend: true
 
-  # helper methode for authenticate user
+  # helper method to authenticate user
   def authenticate
     @user = User.find_by_id(request.headers['X-SPUR-USER-ID'])
     if @user.present?
