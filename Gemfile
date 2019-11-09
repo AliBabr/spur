@@ -8,12 +8,9 @@ gem 'rails', '~> 5.2.3'
 gem 'devise'
 gem 'simple_token_authentication', '~> 1.0'
 gem 'active_model_serializers', '~> 0.10.0'
-# Use sqlite3 as the database for Active Record
-#gem 'sqlite3'
+gem 'httparty', '~> 0.13.7'
 # Use postgresql as the database for Active Record
 gem 'pg'
-# User google places api 
-gem 'google_places'
 # use figaro for environment variables
 gem 'figaro'
 # Use pry for debugging purposes

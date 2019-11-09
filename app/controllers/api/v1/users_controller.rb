@@ -15,7 +15,7 @@ class Api::V1::UsersController < ApplicationController
         render json: { message: 'No Email and Password matching that account were found' }, status: 400
       end
     end
-  rescue StandardError => e # rescu if any exception occure
+  rescue StandardError => e # rescue if any exception occurr
     render json: { message: 'Error: Something went wrong... ' }, status: 400
   end
 
