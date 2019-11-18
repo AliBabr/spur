@@ -5,9 +5,9 @@ class ApplicationController < ActionController::Base
 
   # helper method to authenticate user
   def authenticate
-    @user = User.find_by_id(request.headers['X_SPUR_USER_ID'])
+    @user = User.find_by_id(request.headers['UUID'])
     if @user.present?
-      if User.validate_token(request.headers['X_SPUR_USER_ID'], request.headers['Authentication_Token'])
+      if User.validate_token(request.headers['UUID'], request.headers['Authentication-Token'])
         return true
       else
         render json: { message: 'Unauthorized!' }, status: 401
