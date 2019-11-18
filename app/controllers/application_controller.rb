@@ -7,7 +7,7 @@ class ApplicationController < ActionController::Base
   def authenticate
     @user = User.find_by_id(request.headers['UUID'])
     if @user.present?
-      if User.validate_token(request.headers['UUID'], request.headers['Authentication-Token'])
+      if User.validate_token(request.headers['UUID'], request.headers['Authentication'])
         return true
       else
         render json: { message: 'Unauthorized!' }, status: 401
