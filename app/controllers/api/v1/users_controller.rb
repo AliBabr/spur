@@ -1,5 +1,5 @@
 class Api::V1::UsersController < ApplicationController
-  before_action :authenticate, only: %i[update_account update_password log_out get_user] # callback for validating user
+  before_action :authenticate, only: %i[update_account update_password user_data log_out get_user] # callback for validating user
   before_action :forgot_validation, only: [:forgot_password]
   before_action :before_reset, only: [:reset_password]
 
@@ -12,7 +12,7 @@ class Api::V1::UsersController < ApplicationController
       if user.present? && user.valid_password?(params[:password])
         image_url = ''
         image_url = url_for(user.profile_photo) if user.profile_photo.attached?
-        render json: { email: user.email, first_name: user.first_name, last_name: user.last_name, profile_photo: image_url, 'UUID' => user.id, 'Authentication' => user.authentication_token }, status: 200
+        render json: { email: user.email, first_name: user.first_name, last_name: user.last_name, profile_photo: image_url ,pickup_notification: user.pickup_notification, arrival_notification: user.arrival_notification, 'UUID' => user.id, 'Authentication' => user.authentication_token }, status: 200
       else
         render json: { message: 'No Email and Password matching that account were found' }, status: 400
       end
@@ -24,7 +24,7 @@ class Api::V1::UsersController < ApplicationController
   def get_user
     image_url = ''
     image_url = url_for(@user.profile_photo) if @user.profile_photo.attached?
-    render json: {first_name: @user.first_name, last_name: @user.last_name, email: @user.email, profile_photo: image_url }, status: 200
+    render json: {first_name: @user.first_name, last_name: @user.last_name, email: @user.email, profile_photo: image_url, pickup_notification: @user.pickup_notification, arrival_notification: @user.arrival_notification }, status: 200
   rescue StandardError => e # rescue if any exception occurr
     render json: { message: 'Error: Something went wrong... ' }, status: 400
   end
@@ -35,12 +35,12 @@ class Api::V1::UsersController < ApplicationController
     if user.save
       image_url = ''
       image_url = url_for(user.profile_photo) if user.profile_photo.attached?
-      render json: { email: user.email, first_name: user.first_name, last_name: user.last_name, profile_photo: image_url, 'UUID' => user.id, 'Authentication' => user.authentication_token }, status: 200
+      render json: { email: user.email, first_name: user.first_name, last_name: user.last_name, profile_photo: image_url, pickup_notification: user.pickup_notification, arrival_notification: user.arrival_notification , 'UUID' => user.id, 'Authentication' => user.authentication_token }, status: 200
     else
       render json: user.errors.messages, status: 400
     end
   rescue StandardError => e # rescue if any exception occurr
-    render json: { message: 'Error: Something went wrong... ' }, status: 400
+    render json: { message: "Error: Something went wrong... #{e}" }, status: 400
   end
 
   # Method that expire user session
@@ -59,7 +59,7 @@ class Api::V1::UsersController < ApplicationController
     else
       image_url = ''
       image_url = url_for(@user.profile_photo) if @user.profile_photo.attached?
-      render json: {first_name: @user.first_name, last_name: @user.last_name, email: @user.email, profile_photo: image_url }, status: 200
+      render json: {first_name: @user.first_name, last_name: @user.last_name, email: @user.email, profile_photo: image_url, pickup_notification: @user.pickup_notification, arrival_notification: @user.arrival_notification }, status: 200
     end
   rescue StandardError => e
     render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
