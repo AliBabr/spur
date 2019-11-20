@@ -16,7 +16,7 @@ class Api::V1::HistoryController < ApplicationController
   # Method to store new history
   def create
     history = History.new(history_params)
-    history.user = @user; 
+    history.user = @user;
     history.save ? message = 'History saved successfully' : message = "Fields can't be empty"
     render json: { message: message }, status: :ok
   end
