@@ -1,5 +1,5 @@
 class Api::V1::UsersController < ApplicationController
-  before_action :authenticate, only: %i[update_account update_password log_out] # callback for validating user
+  before_action :authenticate, only: %i[update_account update_password log_out get_user] # callback for validating user
   before_action :forgot_validation, only: [:forgot_password]
   before_action :before_reset, only: [:reset_password]
 
@@ -10,7 +10,9 @@ class Api::V1::UsersController < ApplicationController
     else
       user = User.find_by_email(params[:email])
       if user.present? && user.valid_password?(params[:password])
-        render json: { email: user.email, first_name: user.first_name, last_name: user.last_name, 'UUID' => user.id, 'Authentication' => user.authentication_token }, status: 200
+        image_url = ''
+        image_url = url_for(user.profile_photo) if user.profile_photo.attached?
+        render json: { email: user.email, first_name: user.first_name, last_name: user.last_name, profile_photo: image_url, 'UUID' => user.id, 'Authentication' => user.authentication_token }, status: 200
       else
         render json: { message: 'No Email and Password matching that account were found' }, status: 400
       end
@@ -19,11 +21,21 @@ class Api::V1::UsersController < ApplicationController
     render json: { message: 'Error: Something went wrong... ' }, status: 400
   end
 
+  def get_user
+    image_url = ''
+    image_url = url_for(@user.profile_photo) if @user.profile_photo.attached?
+    render json: {first_name: @user.first_name, last_name: @user.last_name, email: @user.email, profile_photo: image_url }, status: 200
+  rescue StandardError => e # rescue if any exception occurr
+    render json: { message: 'Error: Something went wrong... ' }, status: 400
+  end
+
   # Method which accepts parameters from user and save data in db
   def sign_up
     user = User.new(user_params); user.id = SecureRandom.uuid # genrating secure uuid token
     if user.save
-      render json: { email: user.email, first_name: user.first_name, last_name: user.last_name, 'UUID' => user.id, 'Authentication' => user.authentication_token }, status: 200
+      image_url = ''
+      image_url = url_for(user.profile_photo) if user.profile_photo.attached?
+      render json: { email: user.email, first_name: user.first_name, last_name: user.last_name, profile_photo: image_url, 'UUID' => user.id, 'Authentication' => user.authentication_token }, status: 200
     else
       render json: user.errors.messages, status: 400
     end
@@ -45,7 +57,9 @@ class Api::V1::UsersController < ApplicationController
     if @user.errors.any?
       render json: @user.errors.messages, status: 400
     else
-      render json: @user.as_json(only: %i[first_name last_name email]), status: 200
+      image_url = ''
+      image_url = url_for(@user.profile_photo) if @user.profile_photo.attached?
+      render json: {first_name: @user.first_name, last_name: @user.last_name, email: @user.email, profile_photo: image_url }, status: 200
     end
   rescue StandardError => e
     render json: { message: 'Error: Something went wrong... ' }, status: :bad_request
@@ -97,7 +111,7 @@ class Api::V1::UsersController < ApplicationController
   private
 
   def user_params # permit user params
-    params.permit(:email, :password, :first_name, :last_name)
+    params.permit(:email, :password, :first_name, :last_name, :profile_photo)
   end
 
   # Helper method for forgot password method

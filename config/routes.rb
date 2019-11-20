@@ -12,6 +12,7 @@ Rails.application.routes.draw do
           post :update_account
           post :forgot_password
           post :reset_password
+          get :get_user
         end
         member do
           get :reset
