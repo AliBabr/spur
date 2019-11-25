@@ -32,8 +32,8 @@ class Places
   def search_place
     @radius = @params[:radius] if @params[:radius].present?
     @type = @params[:type] if @params[:type].present?
-    if @params[:filters].present?
-      places=HTTParty.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=#{@params[:lat]},#{@params[:lng]}&key=#{ENV['GOOGLE_PLACES_KEY']}&name="+@params[:filters]+"&radius=#{@radius}&type=#{@type}")
+    if @params[:choices].present?
+      places=HTTParty.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=#{@params[:lat]},#{@params[:lng]}&key=#{ENV['GOOGLE_PLACES_KEY']}&name="+@params[:choices]+"&radius=#{@radius}&type=#{@type}")
     else
       places=HTTParty.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=#{@params[:lat]},#{@params[:lng]}&key=#{ENV['GOOGLE_PLACES_KEY']}&radius=#{@radius}&type=#{@type}")
     end

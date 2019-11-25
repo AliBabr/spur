@@ -11,9 +11,9 @@ class Api::V1::PlacesController < ApplicationController
 
   def save_preference
     preference = Preference.new
-    if params[:filters].present?
-      filters = params[:filters]
-      preference.filters = filters
+    if params[:choices].present?
+      choices = params[:choices]
+      preference.filters = choices
     end
     if params[:price_level].present?
       preference.price_level = params[:price_level].to_i
